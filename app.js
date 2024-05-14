@@ -43,6 +43,25 @@ const validatePassword = async (password, oldPassword) => {
   return isValid;
 };
 
+// Authenticating user with jwtToken
+const AuthenticateUser = (request, response, next) => {
+  const authHeader = request.headers["authorization"];
+  if (authHeader === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    const jwtToken = authHeader.split(" ")[1];
+    jwt.verify(jwtToken, secretText, async (error, payload) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        next();
+      }
+    });
+  }
+};
+
 // API 1 registering a new user
 app.post("/register/", async (req, res) => {
   const { username, password, name, gender } = req.body;
