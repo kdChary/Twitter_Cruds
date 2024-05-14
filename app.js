@@ -4,6 +4,7 @@ const path = require("path");
 const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,8 @@ const setDbAndRun = async () => {
   }
 };
 setDbAndRun();
+
+const secretText = "twitterClone";
 
 // Hashing the password
 const checkPassword = async (password) => {
@@ -73,6 +76,34 @@ app.post("/register/", async (req, res) => {
   } else {
     res.status(400);
     res.send("User already exists");
+  }
+});
+
+// API 2 login the user.
+app.post("/login/", async (req, res) => {
+  const { username, password } = req.body;
+
+  const getUserQuery = `SELECT * FROM user WHERE username = "${username}";`;
+  const userExists = await db.get(getUserQuery);
+
+  if (userExists === undefined) {
+    res.status(400);
+    res.send("Invalid user");
+  } else {
+    const isValidPassword = await validatePassword(
+      password,
+      userExists.password
+    );
+
+    if (isValidPassword) {
+      const payload = { username: username };
+      const jwtToken = jwt.sign(payload, secretText);
+      res.send({ jwtToken });
+      //   console.log(jwtToken);
+    } else {
+      res.status(400);
+      res.send("Invalid Password");
+    }
   }
 });
 

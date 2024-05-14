@@ -8,3 +8,13 @@ Content-Type: application/json
   "gender":"male"
 }
 ###
+
+# Request to login user
+POST http://localhost:3000/login/
+Content-Type: application/json
+
+{
+    "username":"JoeBiden",
+    "password":"biden@123"
+}
+###
